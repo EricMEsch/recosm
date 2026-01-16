@@ -1,0 +1,29 @@
+/RMG/Processes/HadronicPhysics Shielding
+/RMG/Processes/OpticalPhysics true
+
+/RMG/Geometry/RegisterDetectorsFromGDML Germanium
+/RMG/Geometry/RegisterDetectorsFromGDML Optical
+
+/RMG/Geometry/RegisterDetector Scintillator atmosphericlar 12000
+/RMG/Output/ActivateOutputScheme Track
+
+/RMG/Processes/UseGrabmayrsGammaCascades
+
+/RMG/Processes/DefaultProductionCut 1 mm
+/RMG/Processes/SensitiveProductionCut 1 mm
+
+/run/initialize
+
+/RMG/GrabmayrGammaCascades/SetGammaCascadeFile 1 1 water_cascades.txt
+
+/RMG/Output/Track/AddProcessFilter RMGnCapture
+
+/RMG/Processes/Stepping/DaughterNucleusMaxLifetime 1 hour
+/RMG/Output/NtuplePerDetector false
+
+/RMG/Generator/Confine UnConfined
+
+/RMG/Generator/Select MUSUNCosmicMuons
+/RMG/Generator/MUSUNCosmicMuons/MUSUNFile musun/combined_file.dat
+
+/run/beamOn 100000
