@@ -1,2 +1,9 @@
 /data
 /1d_map
+/plots
+*.csv
+*.csv#
+
+__pycache__/
+
+my_processing.ipynb

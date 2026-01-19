@@ -61,8 +61,8 @@ def weight_edep_top_outside_r(radius: float) -> tuple[float, float]:
     if radius < 1820:
         raise ValueError("Radius must be >= 1820 mm for top_outside_r zone.")
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/top_outside_r.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/top_outside_r_xenon.json"
+    path_normal = "./1d_map/top_outside_r.json"
+    path_xenon = "./1d_map/top_outside_r_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -93,8 +93,8 @@ def weight_edep_top_outside_r(radius: float) -> tuple[float, float]:
 
 def weight_edep_top_inside_r(radius: float) -> tuple[float, float]:
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/top_inside_r.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/top_inside_r_xenon.json"
+    path_normal = "./1d_map/top_inside_r.json"
+    path_xenon = "./1d_map/top_inside_r_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -125,8 +125,8 @@ def weight_edep_top_inside_r(radius: float) -> tuple[float, float]:
 
 def weight_edep_middle_r(radius: float) -> tuple[float, float]:
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/middle_r.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/middle_r_xenon.json"
+    path_normal = "./1d_map/middle_r.json"
+    path_xenon = "./1d_map/middle_r_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -157,8 +157,8 @@ def weight_edep_middle_r(radius: float) -> tuple[float, float]:
 
 def weight_edep_bot_inside_r(radius: float) -> tuple[float, float]:
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/bottom_inside_r.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/bottom_inside_r_xenon.json"
+    path_normal = "./1d_map/bottom_inside_r.json"
+    path_xenon = "./1d_map/bottom_inside_r_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -192,8 +192,8 @@ def weight_edep_bot_outside_r(radius: float) -> tuple[float, float]:
     if radius < 1820:
         raise ValueError("Radius must be >= 1820 mm for bottom_outside_r zone.")
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/bottom_outside_r.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/bottom_outside_r_xenon.json"
+    path_normal = "./1d_map/bottom_outside_r.json"
+    path_xenon = "./1d_map/bottom_outside_r_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -227,8 +227,8 @@ def weight_edep_close_outside_z(z: float) -> tuple[float, float]:
     if not (z >= 300 or z <= -2900):
         raise ValueError("Z must be >= 300 mm or <= -2900 mm for close_outside_z zone.")
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/close_outside_z.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/close_outside_z_xenon.json"
+    path_normal = "./1d_map/close_outside_z.json"
+    path_xenon = "./1d_map/close_outside_z_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -262,8 +262,8 @@ def weight_edep_close_inside_z(z: float) -> tuple[float, float]:
     if not (-2900 < z < 300):
         raise ValueError("Z must be < 300 mm or > -2900 mm for close_inside_z zone.")
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/close_inside_z.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/close_inside_z_xenon.json"
+    path_normal = "./1d_map/close_inside_z.json"
+    path_xenon = "./1d_map/close_inside_z_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -297,8 +297,8 @@ def weight_edep_middle_inside_z(z: float) -> tuple[float, float]:
     if not (-2900 < z < 300):
         raise ValueError("Z must be < 300 mm or > -2900 mm for middle_inside_z zone.")
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/middle_inside_z.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/middle_inside_z_xenon.json"
+    path_normal = "./1d_map/middle_inside_z.json"
+    path_xenon = "./1d_map/middle_inside_z_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
@@ -332,8 +332,8 @@ def weight_edep_far_inside_z(z: float) -> tuple[float, float]:
     if not (-2900 < z < 300):
         raise ValueError("Z must be < 300 mm or > -2900 mm for far_inside_z zone.")
 
-    path_normal = "/home/eric/sim/cosmogenics/tests/1d_map/far_inside_z.json"
-    path_xenon = "/home/eric/sim/cosmogenics/tests/1d_map/far_inside_z_xenon.json"
+    path_normal = "./1d_map/far_inside_z.json"
+    path_xenon = "./1d_map/far_inside_z_xenon.json"
 
     # Check existence
     if not os.path.exists(path_normal):
