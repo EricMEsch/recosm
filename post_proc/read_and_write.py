@@ -2,9 +2,11 @@ from lgdo import lh5
 import awkward as ak
 import csv
 from dataclasses import asdict
-import os
+import math
 import h5py
 import numpy as np
+from dataclasses import fields
+from processing import Event
 
 def strip_unit(field_name):
     """Strip unit suffix of the form *_in_<unit>"""
@@ -180,3 +182,46 @@ def write_events_to_csv(events, filename):
         writer.writeheader()
         for ev in events:
             writer.writerow(asdict(ev))
+
+
+def read_events_from_csv(filename):
+    events = []
+
+
+    field_types = {f.name: f.type for f in fields(Event)}
+
+    with open(filename, "r", newline="") as f:
+        reader = csv.DictReader(f)
+
+        for i, row in enumerate(reader):
+            converted = {}
+
+            for name, value in row.items():
+                target_type = field_types[name]
+
+                # Normalize empty strings
+                if value == "" or value.lower() == "nan":
+                    if target_type is int:
+                        converted[name] = 0
+                    elif target_type is float:
+                        converted[name] = float("nan")
+                    else:
+                        converted[name] = None
+                    continue
+
+                if target_type is int:
+                    v = float(value)
+                    if math.isnan(v):
+                        converted[name] = 0
+                    else:
+                        converted[name] = int(v)
+
+                elif target_type is float:
+                    converted[name] = float(value)
+
+                else:
+                    converted[name] = target_type(value)
+
+            events.append(Event(**converted))
+
+    return events
