@@ -237,6 +237,9 @@ def compute_track_features(tracks_data):
     z_lower_straight_part = -2280 # mm
     z_upper_straight_part = 1720 # mm
 
+    #
+    water_tank_radius = 6000 # mm
+
     ge77_Z = 32
     ge77_A = 77
     ge77_target_id = 100000000 + ge77_Z*1000 + ge77_A
@@ -263,7 +266,8 @@ def compute_track_features(tracks_data):
         n_neutrons = np.sum(sub["particle_id"].apply(is_capture_nucleus) &
                             ((sub["radius"] > cryo_inner_radius) |
                              (sub["z"] < z_lower_straight_part) |
-                             (sub["z"] > z_upper_straight_part)))
+                             (sub["z"] > z_upper_straight_part))
+                             & (sub["radius"] <= water_tank_radius))
         
         return pd.Series([ge77_count, n_neutrons])
     result = (
