@@ -3,6 +3,7 @@ import pandas as pd
 from dataclasses import dataclass
 import numpy as np
 import awkward as ak
+import tqdm
 from reboost.spms.pe import emitted_scintillation_photons
 
 from weights import get_weighted_energy
@@ -31,6 +32,9 @@ class Event:
 import pandas as pd
 import numpy as np
 import awkward as ak
+
+# According to CDR, this is the chance a photon hitting the PMMA being detected
+SIPM_DET_EFFICIENCY = 1.2e-3
 
 def compute_optical_features(optical_data):
     # --- Convert to DataFrame ---
@@ -178,7 +182,7 @@ def compute_scintillator_features(scintillator_data, window_us=10):
 
     # --- Now process events in one loop ---
     results = []
-    for evtid, e, e_xenon, t, n_photons, n_photons_xenon in zip(evt_ids, weighted_edep_by_event, weighted_edep_xenon_by_event, time_by_event, n_photons_by_event, n_photons_xenon_by_event):
+    for evtid, e, e_xenon, t, n_photons, n_photons_xenon in tqdm.tqdm(zip(evt_ids, weighted_edep_by_event, weighted_edep_xenon_by_event, time_by_event, n_photons_by_event, n_photons_xenon_by_event)):
         # Sort by time
         order = np.argsort(t)
         t = t[order]
@@ -217,9 +221,7 @@ def compute_scintillator_features(scintillator_data, window_us=10):
                 max_sum_xenon = current_sum_xenon
                 max_n_photons_xenon = current_n_photons_xenon
 
-        # According to CDR, this is the chance a photon hitting the PMMA being detected
-        sipm_det_efficiency = 1.2e-3
-        results.append((evtid, max_sum, max_sum_xenon, max_n_photons * sipm_det_efficiency, max_n_photons_xenon * sipm_det_efficiency))
+        results.append((evtid, max_sum, max_sum_xenon, max_n_photons * SIPM_DET_EFFICIENCY, max_n_photons_xenon * SIPM_DET_EFFICIENCY))
 
 
     return pd.DataFrame(results, columns=["event_id", "max_10us_weighted_energy", "max_10us_weighted_energy_xenon", "max_10us_n_photons", "max_10us_n_photons_xenon"])
@@ -322,3 +324,5 @@ def convert_to_event_structure(scintillator_data, optical_data, germanium_data=N
     # Convert to dataclass list
     events = [Event(**row) for row in merged.to_dict(orient="records")]
     return events
+
+

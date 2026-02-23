@@ -15,11 +15,12 @@ def strip_unit(field_name):
     return field_name
 
 
-def read_lgdo_hdf5_table(file_path, table_path):
+def read_lgdo_hdf5_table(file_path, table_path, verbose=False):
     """Read an LGDO table from HDF5 file and return as awkward array"""
     with h5py.File(file_path, 'r') as f:
         if table_path not in f:
-            print(f"Warning. Table path {table_path} not found in file {file_path}.")
+            if verbose:
+                print(f"Warning. Table path {table_path} not found in file {file_path}.")
             return None
         
         table_group = f[table_path]
@@ -58,13 +59,14 @@ def read_lgdo_hdf5_table(file_path, table_path):
                 data_dict[clean_name] = data
         
         if not data_dict:
-            print(f"Warning. No data found at table path {table_path} in file {file_path}.")
+            if verbose:
+                print(f"Warning. No data found at table path {table_path} in file {file_path}.")
             return None
         
         return ak.zip(data_dict)
 
 
-def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
+def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16, verbose=False):
     """
     Takes the path of where the files should be.
 
@@ -84,19 +86,20 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
 
         # read file
         if file_extension == "hdf5":
-            data = read_lgdo_hdf5_table(file_path, "stp/scintillator")
+            data = read_lgdo_hdf5_table(file_path, "stp/scintillator", verbose=verbose)
         else:
             data = lh5.read_as("stp/scintillator", file_path, "ak")
 
         # apply time cut
         if data is not None:
-            mask = (data.time >= time_min) & (data.time <= time_max)
+            mask = (data.time >= time_min) & (data.time <= time_max) & (data.det_uid == 12000)
             filtered_data = data[mask]
 
             # collect
             all_data.append(filtered_data)
         else:
-            print(f"No scintillator data found in file {file_path}.")
+            if verbose:
+                print(f"No scintillator data found in file {file_path}.")
     concatenated_scint_data = ak.concatenate(all_data)
 
     all_data.clear()
@@ -106,7 +109,7 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
 
         # read file
         if file_extension == "hdf5":
-            data = read_lgdo_hdf5_table(file_path, "stp/optical")
+            data = read_lgdo_hdf5_table(file_path, "stp/optical", verbose=verbose)
         else:
             data = lh5.read_as("stp/optical", file_path, "ak")
 
@@ -114,7 +117,8 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
         if data is not None:
             all_data.append(data)
         else:
-            print(f"No optical data found in file {file_path}.")
+            if verbose:
+                print(f"No optical data found in file {file_path}.")
 
     concatenated_optical_data = ak.concatenate(all_data)
 
@@ -125,7 +129,7 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
 
         # read file
         if file_extension == "hdf5":
-            data = read_lgdo_hdf5_table(file_path, "stp/germanium")
+            data = read_lgdo_hdf5_table(file_path, "stp/germanium", verbose=verbose)
         else:
             data = lh5.read_as("stp/germanium", file_path, "ak")
 
@@ -133,7 +137,8 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
         if data is not None:
             all_data.append(data)
         else:
-            print(f"No germanium data found in file {file_path}.")
+            if verbose:
+                print(f"No germanium data found in file {file_path}.")
 
     concatenated_germanium_data = ak.concatenate(all_data)
 
@@ -145,8 +150,8 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
         # read file
         try:
             if file_extension == "hdf5":
-                data = read_lgdo_hdf5_table(file_path, "stp/tracks")
-                processes = read_lgdo_hdf5_table(file_path, "stp/processes")
+                data = read_lgdo_hdf5_table(file_path, "stp/tracks", verbose=verbose)
+                processes = read_lgdo_hdf5_table(file_path, "stp/processes", verbose=verbose)
             else:
                 data = lh5.read_as("tracks", file_path, "ak")
                 processes = lh5.read_as("processes", file_path, "ak")
@@ -156,14 +161,16 @@ def read_data(output_directory, file_extension = "lh5", nr_of_threads = 16):
             track_mask = data.procid == proc_id
             data = data[track_mask]
         except Exception as e:
-            print(f"Error reading tracks from {file_path}: {e}")
+            if verbose:
+                print(f"Error reading tracks from {file_path}: {e}")
             
 
         # collect
         if data is not None:
             all_data.append(data)
         else:
-            print(f"No tracks data found in file {file_path}.")
+            if verbose:
+                print(f"No tracks data found in file {file_path}.")
 
     concatenated_tracks_data = ak.concatenate(all_data)
 

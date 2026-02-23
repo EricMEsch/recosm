@@ -5,61 +5,76 @@ import numpy as np
 # These functions can be improved a lot. First make them read in the files once
 # Secondly this can probably be done in 1 or 2 functions instead of many similar ones.
 
-MODERATOR_ACTUAL_R = 1720 # mm
-MODERATOR_ACTUAL_Z_TOP = 200 # mm this is the lower edge of the top Plate
-MODERATOR_ACTUAL_Z_BOT = -2800 # mm this is the upper edge of the bottom Plate
+MODERATOR_ACTUAL_R = 1650 # mm this is the inner radius
+MODERATOR_ACTUAL_Z_TOP = 703 # mm this is the lower edge of the top Plate
+MODERATOR_ACTUAL_Z_BOT = -2297 # mm this is the upper edge of the bottom Plate
+THICKNESS_ACTUAL_TOP = 100 # mm
+THICKNESS_ACTUAL_BOT = 100 # mm
+THICKNESS_R = 100 # mm
 
 MODERATOR_MAP_R = 1720 # mm
 MODERATOR_MAP_Z_TOP = 920 # mm this is the lower edge of the top Plate
-MODERATOR_MAP_Z_BOT = -2080 # mm this is the upper edge of the bottom
+MODERATOR_MAP_Z_BOT = -2080 # mm this is the upper edge of the bottom Plate
 
-SHIFT_Z = MODERATOR_MAP_Z_TOP - MODERATOR_ACTUAL_Z_TOP
+SHIFT_Z = MODERATOR_MAP_Z_TOP - MODERATOR_ACTUAL_Z_TOP # We shift us into the map coordinates. So our data + shift = map coords
 SHIFT_R = MODERATOR_MAP_R - MODERATOR_ACTUAL_R
 
 def get_weighted_energy(radius: float, z: float) -> tuple[float, float]:
     """Get the weighted energy deposition for a given radius, z-coordinate, and xenon flag.
        Expects the radius and z in mm.
        """
-    if z > 300 or radius > 1820 or z < -2900:
+
+    # We compare against our position, so no shift is needed here. The shift is only for the map lookup.
+    if z > (MODERATOR_ACTUAL_Z_TOP) or radius > (MODERATOR_ACTUAL_R) or z < (MODERATOR_ACTUAL_Z_BOT):
         # outside zones
-        if radius <= 1820:
+        if radius <= (MODERATOR_ACTUAL_R + THICKNESS_R):
             # Use the outside_close zone in z-direction
             return weight_edep_close_outside_z(z)
         else:
             # use the different outside r zones
-            if z > 400:
+            if z > (MODERATOR_ACTUAL_Z_TOP + THICKNESS_ACTUAL_TOP + 30):
+                # This is completly top zone
                 return weight_edep_top_outside_r(radius)
-            elif z > 0:
+            elif z > (MODERATOR_ACTUAL_Z_TOP - 100):
+                # This is a 120 mm + plate thick zone around the top plate
                 return weight_edep_top_inside_r(radius)
-            elif z > -2600:
+            elif z > (MODERATOR_ACTUAL_Z_BOT + 100):
+                # This is the middle zone
                 return weight_edep_middle_r(radius)
-            elif z > -3000:
+            elif z > (MODERATOR_ACTUAL_Z_BOT - THICKNESS_ACTUAL_BOT - 30):
+                # This is a 120 mm + plate thick zone around the bottom plate
                 return weight_edep_bot_inside_r(radius)
             else:
+                # This is the far bottom zone
                 return weight_edep_bot_outside_r(radius)
     else:
         # inside zones
-        if (z >= ((radius - 1720) + 200)) or (z <= ((1720 - radius) - 2800)):
+        if (z >= ((radius - MODERATOR_ACTUAL_R) + MODERATOR_ACTUAL_Z_TOP)) or (z <= ((MODERATOR_ACTUAL_R - radius) + MODERATOR_ACTUAL_Z_BOT)):
             # use the inside z-direction zones
-            if radius < 1281:
-                return weight_edep_far_inside_z(z)
-            elif radius <= 1520:
+            if (MODERATOR_ACTUAL_R - radius) < 200:
+                # In the first 200 mm use the close z zone
+                return weight_edep_close_inside_z(z)
+            elif (MODERATOR_ACTUAL_R - radius) < 500:
+                # In the next 300 mm use the middle z zone
                 return weight_edep_middle_inside_z(z)
             else:
-                return weight_edep_close_inside_z(z)
+                # For everything farther inside use the far inside z zone
+                return weight_edep_far_inside_z(z)
         else: 
             # use the r-zones
-            if z > 0:
+            if z > (MODERATOR_ACTUAL_Z_TOP - 250):
+                # Use top zone for first 250 mm
                 return weight_edep_top_inside_r(radius)
-            elif z > -2600:
+            elif z > (MODERATOR_ACTUAL_Z_BOT + 250):
+                # Use bottom zone for last 250 mm
                 return weight_edep_middle_r(radius)
             else:
                 return weight_edep_bot_inside_r(radius)
 
 
 def weight_edep_top_outside_r(radius: float) -> tuple[float, float]:
-    if radius < 1820:
-        raise ValueError("Radius must be >= 1820 mm for top_outside_r zone.")
+    if radius < MODERATOR_ACTUAL_R:
+        raise ValueError(f"Radius must be >= {MODERATOR_ACTUAL_R} mm for top_outside_r zone.")
 
     path_normal = "./1d_map/top_outside_r.json"
     path_xenon = "./1d_map/top_outside_r_xenon.json"
@@ -189,8 +204,8 @@ def weight_edep_bot_inside_r(radius: float) -> tuple[float, float]:
 
 def weight_edep_bot_outside_r(radius: float) -> tuple[float, float]:
 
-    if radius < 1820:
-        raise ValueError("Radius must be >= 1820 mm for bottom_outside_r zone.")
+    if radius < MODERATOR_ACTUAL_R:
+        raise ValueError(f"Radius must be >= {MODERATOR_ACTUAL_R} mm for bottom_outside_r zone.")
 
     path_normal = "./1d_map/bottom_outside_r.json"
     path_xenon = "./1d_map/bottom_outside_r_xenon.json"
@@ -224,8 +239,8 @@ def weight_edep_bot_outside_r(radius: float) -> tuple[float, float]:
 
 def weight_edep_close_outside_z(z: float) -> tuple[float, float]:
 
-    if not (z >= 300 or z <= -2900):
-        raise ValueError("Z must be >= 300 mm or <= -2900 mm for close_outside_z zone.")
+    if not (z >= MODERATOR_ACTUAL_Z_TOP or z <= -MODERATOR_ACTUAL_Z_BOT):
+        raise ValueError(f"Z must be >= {MODERATOR_ACTUAL_Z_TOP} mm or <= -{MODERATOR_ACTUAL_Z_BOT} mm for close_outside_z zone.")
 
     path_normal = "./1d_map/close_outside_z.json"
     path_xenon = "./1d_map/close_outside_z_xenon.json"
@@ -259,8 +274,8 @@ def weight_edep_close_outside_z(z: float) -> tuple[float, float]:
 
 def weight_edep_close_inside_z(z: float) -> tuple[float, float]:
 
-    if not (-2900 < z < 300):
-        raise ValueError("Z must be < 300 mm or > -2900 mm for close_inside_z zone.")
+    if not (MODERATOR_ACTUAL_Z_BOT < z < MODERATOR_ACTUAL_Z_TOP):
+        raise ValueError(f"Z must be < {MODERATOR_ACTUAL_Z_TOP} mm or > -{MODERATOR_ACTUAL_Z_BOT} mm for close_inside_z zone.")
 
     path_normal = "./1d_map/close_inside_z.json"
     path_xenon = "./1d_map/close_inside_z_xenon.json"
@@ -294,8 +309,8 @@ def weight_edep_close_inside_z(z: float) -> tuple[float, float]:
 
 def weight_edep_middle_inside_z(z: float) -> tuple[float, float]:
 
-    if not (-2900 < z < 300):
-        raise ValueError("Z must be < 300 mm or > -2900 mm for middle_inside_z zone.")
+    if not (MODERATOR_ACTUAL_Z_BOT < z < MODERATOR_ACTUAL_Z_TOP):
+        raise ValueError(f"Z must be < {MODERATOR_ACTUAL_Z_TOP} mm or > {MODERATOR_ACTUAL_Z_BOT} mm for middle_inside_z zone.")
 
     path_normal = "./1d_map/middle_inside_z.json"
     path_xenon = "./1d_map/middle_inside_z_xenon.json"
@@ -329,8 +344,8 @@ def weight_edep_middle_inside_z(z: float) -> tuple[float, float]:
 
 def weight_edep_far_inside_z(z: float) -> tuple[float, float]:
 
-    if not (-2900 < z < 300):
-        raise ValueError("Z must be < 300 mm or > -2900 mm for far_inside_z zone.")
+    if not (MODERATOR_ACTUAL_Z_BOT < z < MODERATOR_ACTUAL_Z_TOP):
+        raise ValueError(f"Z must be < {MODERATOR_ACTUAL_Z_TOP} mm or > {MODERATOR_ACTUAL_Z_BOT} mm for far_inside_z zone. Z is {z} mm.")
 
     path_normal = "./1d_map/far_inside_z.json"
     path_xenon = "./1d_map/far_inside_z_xenon.json"
